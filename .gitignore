@@ -1,33 +1,37 @@
-HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+# Compiled class files
+*.class
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Maven target directory
+/target/
 
-### IntelliJ IDEA ###
-.idea
-*.iws
+# IntelliJ project files
+.idea/
 *.iml
-*.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
-
-### VS Code ###
+# VS Code settings
 .vscode/
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+
+# IDE-specific files
+*.swp
+*~
+
+# Java build files
+*.jar
+*.war
+*.ear
+
+# Lombok
+*.lombok
+
+# Spring Boot
+.spring-boot-devtools.properties
