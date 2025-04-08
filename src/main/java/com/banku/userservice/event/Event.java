@@ -1,5 +1,6 @@
 package com.banku.userservice.event;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
@@ -10,7 +11,8 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@Document(collection = "events")
+@Document(collection = "user_events")
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
 public abstract class Event {
     @Id
     private String id;

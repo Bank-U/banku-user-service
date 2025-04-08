@@ -5,6 +5,7 @@ import com.banku.userservice.event.Event;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
+import com.banku.userservice.service.KafkaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class UserAggregateRepository implements AggregateRepository<UserAggregate, String> {
     private final EventStore eventStore;
+    private final KafkaService kafkaService;
 
     @Override
     public UserAggregate findById(String id) {
@@ -24,7 +26,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
         }
 
         UserAggregate aggregate = new UserAggregate();
-        aggregate.setId(id); // Set the ID explicitly
+        aggregate.setId(id);
         events.forEach(aggregate::apply);
         return aggregate;
     }
@@ -35,9 +37,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
         
         return allEvents.stream()
                 .filter(event -> {
-                    // Get the aggregate for this event
                     UserAggregate aggregate = findById(event.getAggregateId());
-                    // Check if the aggregate exists and has the matching email
                     return aggregate != null && email.equals(aggregate.getEmail());
                 })
                 .map(event -> findById(event.getAggregateId()))
@@ -52,6 +52,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
         for (Event event : newEvents) {
             event.setVersion(aggregate.getVersion() + 1);
             eventStore.save(event);
+            kafkaService.publishEvent(event);
         }
     }
 
@@ -59,6 +60,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
         UserCreatedEvent event = new UserCreatedEvent(aggregateId, email, password);
         event.setVersion(1);
         eventStore.save(event);
+        kafkaService.publishEvent(event);
     }
 
     public void updateUser(String id, String email, String password) {
@@ -67,6 +69,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
             UserUpdatedEvent event = new UserUpdatedEvent(id, email, password);
             event.setVersion(aggregate.getVersion() + 1);
             eventStore.save(event);
+            kafkaService.publishEvent(event);
         }
     }
 
@@ -76,6 +79,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
             UserDeletedEvent event = new UserDeletedEvent(id);
             event.setVersion(aggregate.getVersion() + 1);
             eventStore.save(event);
+            kafkaService.publishEvent(event);
         }
     }
 } 
