@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: user-service
+  profiles:
+    active: local
+  data:
+    mongodb:
+      uri: ${spring.data.mongodb.uri}
+jwt:
+  secret: ${jwt.secret}
