@@ -23,6 +23,14 @@ public class ApiException extends RuntimeException {
         this.error = error;
     }
     
+    public HttpStatus getHttpStatus() {
+        return httpStatus;
+    }
+    
+    public String getError() {
+        return error;
+    }
+    
     public ResponseEntity<Map<String, Object>> toResponse() {
         Map<String, Object> response = new HashMap<>();
         response.put("error", error);
