@@ -3,7 +3,7 @@ version: '3.8'
 services:
   mongodb:
     image: mongo:6.0
-    container_name: banku-mongodb
+    container_name: banku-mongodb-user
     ports:
       - "27017:27017"
     environment:
@@ -37,5 +37,16 @@ services:
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: banku-kafka-ui
+    depends_on:
+      - kafka
+    ports:
+      - "8090:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: banku-local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
 volumes:
   mongo_data:
