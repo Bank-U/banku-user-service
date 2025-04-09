@@ -1,6 +1,6 @@
 package com.banku.userservice.service;
 
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
@@ -100,7 +100,7 @@ class KafkaServiceTest {
     @Test
     void publishEvent_WhenSerializationFails_ShouldHandleError() throws Exception {
         // Arrange
-        when(objectMapper.writeValueAsString(any(Event.class)))
+        when(objectMapper.writeValueAsString(any(UserEvent.class)))
             .thenThrow(new RuntimeException("Serialization error"));
 
         // Act & Assert

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class UserCreatedEvent extends Event {
+public class UserCreatedEvent extends UserEvent {
     private String email;
     private String password;
 

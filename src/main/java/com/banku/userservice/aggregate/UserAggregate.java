@@ -1,6 +1,6 @@
 package com.banku.userservice.aggregate;
 
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
@@ -19,7 +19,7 @@ public class UserAggregate extends Aggregate implements UserDetails {
     private String password;
 
     @Override
-    public void apply(Event event) {
+    public void apply(UserEvent event) {
         if (event instanceof UserCreatedEvent) {
             apply((UserCreatedEvent) event);
         } else if (event instanceof UserUpdatedEvent) {

@@ -1,6 +1,6 @@
 package com.banku.userservice.aggregate;
 
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,5 +19,5 @@ public abstract class Aggregate {
         this.deleted = false;
     }
 
-    public abstract void apply(Event event);
+    public abstract void apply(UserEvent event);
 } 

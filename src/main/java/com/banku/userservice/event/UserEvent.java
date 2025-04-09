@@ -13,7 +13,7 @@ import java.util.UUID;
 @Setter
 @Document(collection = "user_events")
 @JsonTypeInfo(use = JsonTypeInfo.Id.CLASS)
-public abstract class Event {
+public abstract class UserEvent {
     @Id
     private String id;
     protected String aggregateId;
@@ -21,7 +21,7 @@ public abstract class Event {
     private Instant timestamp;
     private long version;
 
-    protected Event() {
+    protected UserEvent() {
         this.id = UUID.randomUUID().toString();
         this.timestamp = Instant.now();
         this.eventType = this.getClass().getSimpleName();
