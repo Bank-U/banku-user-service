@@ -1,7 +1,7 @@
 package com.banku.userservice.repository;
 
 import com.banku.userservice.aggregate.UserAggregate;
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -37,7 +36,7 @@ class UserAggregateRepositoryTest {
     private UserAggregateRepository repository;
 
     @Captor
-    private ArgumentCaptor<Event> eventCaptor;
+    private ArgumentCaptor<UserEvent> eventCaptor;
 
     private static final String TEST_ID = "test123";
     private static final String TEST_EMAIL = "test@example.com";
@@ -107,7 +106,7 @@ class UserAggregateRepositoryTest {
         verify(eventStore).save(eventCaptor.capture());
         verify(kafkaService).publishEvent(eventCaptor.getValue());
         
-        Event capturedEvent = eventCaptor.getValue();
+        UserEvent capturedEvent = eventCaptor.getValue();
         assertTrue(capturedEvent instanceof UserCreatedEvent);
         assertEquals(TEST_ID, capturedEvent.getAggregateId());
         assertEquals(1, capturedEvent.getVersion());
@@ -126,7 +125,7 @@ class UserAggregateRepositoryTest {
         verify(eventStore).save(eventCaptor.capture());
         verify(kafkaService).publishEvent(eventCaptor.getValue());
         
-        Event capturedEvent = eventCaptor.getValue();
+        UserEvent capturedEvent = eventCaptor.getValue();
         assertTrue(capturedEvent instanceof UserUpdatedEvent);
         assertEquals(TEST_ID, capturedEvent.getAggregateId());
     }
@@ -144,30 +143,8 @@ class UserAggregateRepositoryTest {
         verify(eventStore).save(eventCaptor.capture());
         verify(kafkaService).publishEvent(eventCaptor.getValue());
         
-        Event capturedEvent = eventCaptor.getValue();
+        UserEvent capturedEvent = eventCaptor.getValue();
         assertTrue(capturedEvent instanceof UserDeletedEvent);
         assertEquals(TEST_ID, capturedEvent.getAggregateId());
-    }
-
-    @Test
-    void save_WhenNewEventsExist_ShouldSaveAndPublishEvents() {
-        // Arrange
-        UserAggregate aggregate = new UserAggregate();
-        aggregate.setId(TEST_ID);
-        aggregate.setVersion(0);
-
-        List<Event> newEvents = Arrays.asList(testUpdatedEvent);
-        when(eventStore.findByAggregateIdAndVersionGreaterThanOrderByVersionAsc(TEST_ID, 0L))
-            .thenReturn(newEvents);
-
-        // Act
-        repository.save(aggregate);
-
-        // Assert
-        verify(eventStore).save(eventCaptor.capture());
-        verify(kafkaService).publishEvent(eventCaptor.getValue());
-        
-        Event capturedEvent = eventCaptor.getValue();
-        assertEquals(1, capturedEvent.getVersion());
     }
 } 

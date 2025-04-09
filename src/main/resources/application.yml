@@ -1,10 +1,28 @@
 spring:
   application:
-    name: user-service
+    name: banku-user-service
   profiles:
     active: local
   data:
     mongodb:
       uri: ${spring.data.mongodb.uri}
+  kafka:
+    consumer:
+      group-id: banku-user-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 jwt:
   secret: ${jwt.secret}
+
+server:
+  port: 8081
+
+logging:
+  level:
+    com.banku.userservice: DEBUG
+    org.springframework.security: DEBUG 
