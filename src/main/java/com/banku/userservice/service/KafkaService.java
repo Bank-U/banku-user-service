@@ -1,6 +1,7 @@
 package com.banku.userservice.service;
 
 import com.banku.userservice.event.UserEvent;
+import com.banku.userservice.event.UserLoginEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
@@ -54,6 +55,9 @@ public class KafkaService {
                 case "com.banku.userservice.event.UserDeletedEvent":
                     event = objectMapper.readValue(message, UserDeletedEvent.class);
                     break;
+                case "com.banku.userservice.event.UserLoginEvent":
+                    event = objectMapper.readValue(message, UserLoginEvent.class);
+                    break;
                 default:
                     log.error("Unknown event type: {}", className);
                     return;
@@ -73,6 +77,8 @@ public class KafkaService {
             handleUserUpdated((UserUpdatedEvent) event);
         } else if (event instanceof UserDeletedEvent) {
             handleUserDeleted((UserDeletedEvent) event);
+        } else if (event instanceof UserLoginEvent) {
+            handleUserLogin((UserLoginEvent) event);
         }
     }
 
@@ -86,5 +92,9 @@ public class KafkaService {
 
     private void handleUserDeleted(UserDeletedEvent event) {
         log.info("Processing user deleted event for user: {}", event.getAggregateId());
+    }
+
+    private void handleUserLogin(UserLoginEvent event) {
+        log.info("Processing user login event for user: {}", event.getAggregateId());
     }
 } 

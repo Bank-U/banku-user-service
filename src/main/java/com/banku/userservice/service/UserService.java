@@ -1,7 +1,6 @@
 package com.banku.userservice.service;
 
 import com.banku.userservice.aggregate.UserAggregate;
-import com.banku.userservice.controller.dto.UpdateUserRequest;
 import com.banku.userservice.controller.dto.UserSelfResponse;
 import com.banku.userservice.exception.DuplicateEmailException;
 import com.banku.userservice.exception.UserNotFoundException;
@@ -40,42 +39,29 @@ public class UserService {
         return userAggregateRepository.findByEmail(email);
     }
 
-    public UserSelfResponse getSelf(String email) {
-        UserAggregate aggregate = userAggregateRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
-                
-        if (aggregate.isDeleted()) {
+    public UserSelfResponse getSelf(String userId) {
+        UserAggregate aggregate = userAggregateRepository.findById(userId);
+        if (aggregate == null || aggregate.isDeleted()) {
             throw new UserNotFoundException("User not found");
         }
         
-        return new UserSelfResponse(aggregate.getId(), aggregate.getEmail());
+        return new UserSelfResponse(aggregate.getId(), aggregate.getEmail(), aggregate.getLoginHistory());
     }
 
-    public UserSelfResponse updateUser(String userId, UpdateUserRequest request) {
+    public UserSelfResponse updateUser(String userId) {
         UserAggregate aggregate = userAggregateRepository.findById(userId);
-        if (aggregate == null) {
+        if (aggregate == null || aggregate.isDeleted()) {
             throw new UserNotFoundException("User not found");
         }
         
-        // Check if the new email is already used by another user
-        if (request.getEmail() != null && !request.getEmail().equals(aggregate.getEmail())) {
-            userAggregateRepository.findByEmail(request.getEmail()).ifPresent(existingUser -> {
-                if (!existingUser.getId().equals(userId)) {
-                    throw new DuplicateEmailException("Email already exists");
-                }
-            });
-        }
+        // Update user with current data (this will create a new event)
+        userAggregateRepository.updateUser(userId, aggregate.getEmail(), null);
         
-        userAggregateRepository.updateUser(
-                userId,
-                request.getEmail(),
-                request.getNewPassword() != null ? passwordEncoder.encode(request.getNewPassword()) : null
-        );
-        
-        // Return updated user info
+        // Return current user info
         return new UserSelfResponse(
             userId,
-            request.getEmail() != null ? request.getEmail() : aggregate.getEmail()
+            aggregate.getEmail(),
+            aggregate.getLoginHistory()
         );
     }
 

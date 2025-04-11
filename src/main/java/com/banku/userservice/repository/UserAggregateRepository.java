@@ -5,6 +5,7 @@ import com.banku.userservice.event.UserEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
+import com.banku.userservice.event.UserLoginEvent;
 import com.banku.userservice.service.KafkaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -41,6 +42,13 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
                 })
                 .map(event -> findById(event.getAggregateId()))
                 .findFirst();
+    }
+
+    public void loginUser(UserAggregate aggregate, boolean isSuccessfulLogin) {
+        UserLoginEvent event = new UserLoginEvent(aggregate.getId(), isSuccessfulLogin);
+        event.setVersion(aggregate.getVersion() + 1);
+        eventStore.save(event);
+        kafkaService.publishEvent(event);
     }
 
     public void createUser(String aggregateId, String email, String password) {
