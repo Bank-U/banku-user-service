@@ -112,7 +112,7 @@ class UserServiceTest {
         when(passwordEncoder.encode(newPassword)).thenReturn("newEncodedPassword");
 
         // Act
-        UserSelfResponse response = userService.updateUser(TEST_USER_ID);
+        UserSelfResponse response = userService.updateUser(TEST_USER_ID, request);
 
         // Assert
         assertNotNull(response);
@@ -125,10 +125,13 @@ class UserServiceTest {
     void updateUser_WhenUserDoesNotExist_ShouldThrowException() {
         // Arrange
         when(userAggregateRepository.findById(TEST_USER_ID)).thenReturn(null);
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setEmail(TEST_EMAIL);
+        request.setNewPassword(TEST_PASSWORD);
 
         // Act & Assert
         assertThrows(UserNotFoundException.class, () -> 
-            userService.updateUser(TEST_USER_ID)
+            userService.updateUser(TEST_USER_ID, request)
         );
     }
 

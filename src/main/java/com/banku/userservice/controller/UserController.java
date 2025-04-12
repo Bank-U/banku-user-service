@@ -1,6 +1,7 @@
 package com.banku.userservice.controller;
 
 import com.banku.userservice.controller.dto.UserSelfResponse;
+import com.banku.userservice.controller.dto.UpdateUserRequest;
 import com.banku.userservice.exception.UnauthorizedAccessException;
 import com.banku.userservice.security.JwtService;
 import com.banku.userservice.service.UserService;
@@ -27,12 +28,12 @@ public class UserController {
     }
 
     @PutMapping
-    public ResponseEntity<UserSelfResponse> updateUser() {
+    public ResponseEntity<UserSelfResponse> updateUser(@RequestBody UpdateUserRequest request) {
         String userId = JwtService.extractUserId();
         if (userId == null) {
             throw new UnauthorizedAccessException("User not authenticated");
         }
-        return ResponseEntity.ok(userService.updateUser(userId));
+        return ResponseEntity.ok(userService.updateUser(userId, request));
     }
 
     @DeleteMapping
