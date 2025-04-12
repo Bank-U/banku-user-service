@@ -1,35 +1,48 @@
 package com.banku.userservice.controller;
 
-import com.banku.userservice.controller.dto.UpdateUserRequest;
 import com.banku.userservice.controller.dto.UserSelfResponse;
+import com.banku.userservice.controller.dto.UpdateUserRequest;
+import com.banku.userservice.exception.UnauthorizedAccessException;
+import com.banku.userservice.security.JwtService;
 import com.banku.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users/self")
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService userService;
 
-    @GetMapping("/self")
-    public ResponseEntity<UserSelfResponse> getSelf(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(userService.getSelf(userDetails.getUsername()));
+    @GetMapping
+    public ResponseEntity<UserSelfResponse> getSelf() {
+        String userId = JwtService.extractUserId();
+        if (userId == null) {
+            throw new UnauthorizedAccessException("User not authenticated");
+        }
+        return ResponseEntity.ok(userService.getSelf(userId));
     }
 
-    @PutMapping("/{userId}")
-    public ResponseEntity<UserSelfResponse> updateUser(
-            @PathVariable String userId,
-            @RequestBody UpdateUserRequest request) {
+    @PutMapping
+    public ResponseEntity<UserSelfResponse> updateUser(@RequestBody UpdateUserRequest request) {
+        String userId = JwtService.extractUserId();
+        if (userId == null) {
+            throw new UnauthorizedAccessException("User not authenticated");
+        }
         return ResponseEntity.ok(userService.updateUser(userId, request));
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+    @DeleteMapping
+    public ResponseEntity<Void> deleteUser() {
+        String userId = JwtService.extractUserId();
+        if (userId == null) {
+            throw new UnauthorizedAccessException("User not authenticated");
+        }
+        log.info("DeletingDeletingDeletingDeletingDeletingDeleting user with ID: {}", userId);
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build();
     }

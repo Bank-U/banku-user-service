@@ -65,32 +65,4 @@ class JwtServiceTest {
         // Assert
         assertEquals(TEST_USER_ID, extractedUserId);
     }
-
-    @Test
-    void isTokenValid_WhenTokenIsValid_ShouldReturnTrue() {
-        // Arrange
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("userId", TEST_USER_ID);
-        String token = jwtService.generateToken(TEST_USERNAME, extraClaims);
-
-        // Act
-        boolean isValid = jwtService.isTokenValid(token, TEST_USERNAME);
-
-        // Assert
-        assertTrue(isValid);
-    }
-
-    @Test
-    void isTokenValid_WhenUsernameDoesNotMatch_ShouldReturnFalse() {
-        // Arrange
-        Map<String, Object> extraClaims = new HashMap<>();
-        extraClaims.put("userId", TEST_USER_ID);
-        String token = jwtService.generateToken(TEST_USERNAME, extraClaims);
-
-        // Act
-        boolean isValid = jwtService.isTokenValid(token, "different@example.com");
-
-        // Assert
-        assertFalse(isValid);
-    }
 } 

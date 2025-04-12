@@ -59,7 +59,7 @@ class JwtAuthFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + TEST_TOKEN);
         when(jwtService.extractUsername(TEST_TOKEN)).thenReturn(TEST_USERNAME);
         when(authenticationService.loadUserByUsername(TEST_USERNAME)).thenReturn(userDetails);
-        when(jwtService.isTokenValid(eq(TEST_TOKEN), eq(TEST_USERNAME))).thenReturn(true);
+        when(jwtService.isTokenValid(eq(TEST_TOKEN))).thenReturn(true);
 
         // Act
         jwtAuthFilter.doFilterInternal(request, response, filterChain);
@@ -89,7 +89,7 @@ class JwtAuthFilterTest {
         when(request.getHeader("Authorization")).thenReturn("Bearer " + TEST_TOKEN);
         when(jwtService.extractUsername(TEST_TOKEN)).thenReturn(TEST_USERNAME);
         when(authenticationService.loadUserByUsername(TEST_USERNAME)).thenReturn(userDetails);
-        when(jwtService.isTokenValid(eq(TEST_TOKEN), eq(TEST_USERNAME))).thenReturn(false);
+        when(jwtService.isTokenValid(eq(TEST_TOKEN))).thenReturn(false);
 
         // Act
         jwtAuthFilter.doFilterInternal(request, response, filterChain);

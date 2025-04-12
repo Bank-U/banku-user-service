@@ -1,6 +1,7 @@
 package com.banku.userservice.aggregate;
 
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
+import com.banku.userservice.event.UserLoginEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
@@ -11,21 +12,26 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
+import java.util.ArrayList;
 
 @Getter
-@Setter
+@Setter 
 public class UserAggregate extends Aggregate implements UserDetails {
     private String email;
     private String password;
+    private List<LoginHistoryAggregate> loginHistory = new ArrayList<>();
 
     @Override
-    public void apply(Event event) {
+    public void apply(UserEvent event) {
         if (event instanceof UserCreatedEvent) {
             apply((UserCreatedEvent) event);
         } else if (event instanceof UserUpdatedEvent) {
             apply((UserUpdatedEvent) event);
         } else if (event instanceof UserDeletedEvent) {
             apply((UserDeletedEvent) event);
+        } else if (event instanceof UserLoginEvent) {
+            apply((UserLoginEvent) event);
         }
         this.version = event.getVersion();
     }
@@ -42,6 +48,10 @@ public class UserAggregate extends Aggregate implements UserDetails {
         if (event.getPassword() != null) {
             this.password = event.getPassword();
         }
+    }
+
+    private void apply(UserLoginEvent event) {
+        this.loginHistory.add(new LoginHistoryAggregate(event.getTimestamp(), event.getIsSuccessfulLogin()));
     }
 
     private void apply(UserDeletedEvent event) {

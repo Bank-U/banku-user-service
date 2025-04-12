@@ -1,6 +1,7 @@
 package com.banku.userservice.service;
 
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
+import com.banku.userservice.event.UserLoginEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
@@ -20,7 +21,7 @@ public class KafkaService {
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
 
-    public void publishEvent(Event event) {
+    public void publishEvent(UserEvent event) {
         try {
             String message = objectMapper.writeValueAsString(event);
             kafkaTemplate.send("banku.user", event.getAggregateId(), message)
@@ -43,7 +44,7 @@ public class KafkaService {
             JsonNode jsonNode = objectMapper.readTree(message);
             String className = jsonNode.get("@class").asText();
             
-            Event event;
+            UserEvent event;
             switch (className) {
                 case "com.banku.userservice.event.UserCreatedEvent":
                     event = objectMapper.readValue(message, UserCreatedEvent.class);
@@ -53,6 +54,9 @@ public class KafkaService {
                     break;
                 case "com.banku.userservice.event.UserDeletedEvent":
                     event = objectMapper.readValue(message, UserDeletedEvent.class);
+                    break;
+                case "com.banku.userservice.event.UserLoginEvent":
+                    event = objectMapper.readValue(message, UserLoginEvent.class);
                     break;
                 default:
                     log.error("Unknown event type: {}", className);
@@ -66,13 +70,15 @@ public class KafkaService {
         }
     }
 
-    private void processEvent(Event event) {
+    private void processEvent(UserEvent event) {
         if (event instanceof UserCreatedEvent) {
             handleUserCreated((UserCreatedEvent) event);
         } else if (event instanceof UserUpdatedEvent) {
             handleUserUpdated((UserUpdatedEvent) event);
         } else if (event instanceof UserDeletedEvent) {
             handleUserDeleted((UserDeletedEvent) event);
+        } else if (event instanceof UserLoginEvent) {
+            handleUserLogin((UserLoginEvent) event);
         }
     }
 
@@ -86,5 +92,9 @@ public class KafkaService {
 
     private void handleUserDeleted(UserDeletedEvent event) {
         log.info("Processing user deleted event for user: {}", event.getAggregateId());
+    }
+
+    private void handleUserLogin(UserLoginEvent event) {
+        log.info("Processing user login event for user: {}", event.getAggregateId());
     }
 } 

@@ -124,8 +124,10 @@ class UserServiceTest {
     @Test
     void updateUser_WhenUserDoesNotExist_ShouldThrowException() {
         // Arrange
-        UpdateUserRequest request = new UpdateUserRequest();
         when(userAggregateRepository.findById(TEST_USER_ID)).thenReturn(null);
+        UpdateUserRequest request = new UpdateUserRequest();
+        request.setEmail(TEST_EMAIL);
+        request.setNewPassword(TEST_PASSWORD);
 
         // Act & Assert
         assertThrows(UserNotFoundException.class, () -> 

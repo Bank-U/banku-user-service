@@ -1,10 +1,11 @@
 package com.banku.userservice.repository;
 
 import com.banku.userservice.aggregate.UserAggregate;
-import com.banku.userservice.event.Event;
+import com.banku.userservice.event.UserEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
+import com.banku.userservice.event.UserLoginEvent;
 import com.banku.userservice.service.KafkaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -20,7 +21,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
 
     @Override
     public UserAggregate findById(String id) {
-        List<Event> events = eventStore.findByAggregateIdOrderByVersionAsc(id);
+        List<UserEvent> events = eventStore.findByAggregateIdOrderByVersionAsc(id);
         if (events.isEmpty()) {
             return null;
         }
@@ -33,8 +34,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
 
     @Override
     public Optional<UserAggregate> findByEmail(String email) {
-        List<Event> allEvents = eventStore.findAll();
-        
+        List<UserEvent> allEvents = eventStore.findAll();
         return allEvents.stream()
                 .filter(event -> {
                     UserAggregate aggregate = findById(event.getAggregateId());
@@ -44,16 +44,11 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
                 .findFirst();
     }
 
-    @Override
-    public void save(UserAggregate aggregate) {
-        List<Event> newEvents = eventStore.findByAggregateIdAndVersionGreaterThanOrderByVersionAsc(
-                aggregate.getId(), aggregate.getVersion());
-
-        for (Event event : newEvents) {
-            event.setVersion(aggregate.getVersion() + 1);
-            eventStore.save(event);
-            kafkaService.publishEvent(event);
-        }
+    public void loginUser(UserAggregate aggregate, boolean isSuccessfulLogin) {
+        UserLoginEvent event = new UserLoginEvent(aggregate.getId(), isSuccessfulLogin);
+        event.setVersion(aggregate.getVersion() + 1);
+        eventStore.save(event);
+        kafkaService.publishEvent(event);
     }
 
     public void createUser(String aggregateId, String email, String password) {
