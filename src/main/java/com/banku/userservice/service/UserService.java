@@ -61,12 +61,12 @@ public class UserService {
         // Validate passwords
         validatePassword(request.getCurrentPassword(), request.getNewPassword(), aggregate.getPassword());
 
-        if (request.getNewPassword() != null) {
-            aggregate.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        }
-
         // Update user with current data (this will create a new event)
-        userAggregateRepository.updateUser(userId, request.getEmail(), request.getNewPassword());
+        userAggregateRepository.updateUser(
+            userId,
+            request.getEmail(),
+            request.getNewPassword() != null ? passwordEncoder.encode(request.getNewPassword()) : null
+        );
         
         // Return current user info
         return new UserSelfResponse(

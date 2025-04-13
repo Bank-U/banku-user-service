@@ -52,6 +52,7 @@ The service implements Event Sourcing to maintain user state. Events are stored 
 - `UserCreatedEvent`: When a new user is created
 - `UserUpdatedEvent`: When an existing user is updated
 - `UserDeletedEvent`: When a user is deleted
+- `UserLoginEvent`: When a user has logged in
 
 ### Event Store
 
