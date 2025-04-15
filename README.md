@@ -155,6 +155,15 @@ spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.Str
 - `PUT /api/v1/users/me`: Update current user information
 - `DELETE /api/v1/users/me`: Delete current user
 
+## API Documentation
+
+The service provides OpenAPI (Swagger) documentation that can be accessed through:
+
+- Direct access: http://localhost:8081/api/v1/user/swagger-ui/index.html
+- Through Gateway: http://localhost:8080/api/v1/user/swagger-ui/index.html
+
+The API documentation includes detailed information about all endpoints, request/response schemas, and authentication requirements.
+
 ## Development
 
 ### Requirements
