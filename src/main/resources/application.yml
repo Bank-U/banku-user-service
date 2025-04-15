@@ -26,3 +26,16 @@ logging:
   level:
     com.banku.userservice: DEBUG
     org.springframework.security: DEBUG 
+
+springdoc:
+  swagger-ui:
+    path: /api/v1/users/swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+  api-docs:
+    path: /api/v1/users/v3/api-docs
+  show-actuator: true
+  packages-to-scan: com.banku.userservice.controller
+  paths-to-match: /api/v1/** 
