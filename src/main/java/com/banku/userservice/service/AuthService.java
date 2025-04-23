@@ -3,13 +3,19 @@ package com.banku.userservice.service;
 import com.banku.userservice.aggregate.UserAggregate;
 import com.banku.userservice.controller.dto.AuthResponse;
 import com.banku.userservice.controller.dto.LoginRequest;
+import com.banku.userservice.controller.dto.OAuthLoginRequest;
 import com.banku.userservice.controller.dto.RegisterRequest;
 import com.banku.userservice.exception.InvalidPasswordException;
 import com.banku.userservice.exception.UserNotFoundException;
 import com.banku.userservice.repository.UserAggregateRepository;
 import com.banku.userservice.security.JwtService;
+import com.banku.userservice.service.oauth.OAuthProvider;
+import com.banku.userservice.service.oauth.OAuthProviderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
@@ -17,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +34,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserAggregateRepository aggregateRepository;
+    private final OAuthProviderService oAuthProviderService;
 
 
     public AuthResponse register(RegisterRequest request) {
@@ -102,5 +110,31 @@ public class AuthService {
         String newToken = generateToken(username, aggregate.getId());
 
         return new AuthResponse(newToken, aggregate.getId());
+    }
+
+    public AuthResponse oauth2Login(OAuthLoginRequest request) {
+        OAuthProvider provider = oAuthProviderService.getProvider(request.getProvider());
+        UserAggregate oauthUser = provider.getUserInfo(request.getCode());
+
+        Optional<UserAggregate> existingUser = userService.findByEmail(oauthUser.getEmail());
+        UserAggregate user = existingUser.orElseGet(() -> userService.register(oauthUser));
+
+        String jwtToken = generateToken(user.getEmail(), user.getId());
+        return new AuthResponse(jwtToken, user.getId());
+    }
+
+    public ResponseEntity<Void>     handleOAuth2Callback(String provider, String code) {
+        OAuthProvider oAuthProvider = oAuthProviderService.getProvider(provider);
+        UserAggregate oauthUser = oAuthProvider.getUserInfo(code);
+
+        log.debug("oauthUserEEMAIL: " + oauthUser.getEmail());
+        UserAggregate user = userService.findByEmail(oauthUser.getEmail())
+            .orElseGet(() -> userService.register(oauthUser));
+
+        String jwtToken = generateToken(user.getEmail(), user.getId());
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", "http://localhost:4200/auth/callback?token=" + jwtToken);
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 } 

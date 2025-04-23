@@ -32,10 +32,29 @@ public class UserService {
         userAggregateRepository.createUser(
                 aggregateId,
                 email,
-                passwordEncoder.encode(password)
+                password != null ? passwordEncoder.encode(password) : null
         );
         
         return aggregate;
+    }
+
+    public UserAggregate register(UserAggregate userAggregate) {
+        if (userAggregateRepository.findByEmail(userAggregate.getEmail()).isPresent()) {
+            throw new DuplicateEmailException("Email already exists");
+        }
+
+        userAggregateRepository.createUser(
+            userAggregate.getId(),
+            userAggregate.getEmail(),
+            userAggregate.getPassword() != null ? passwordEncoder.encode(userAggregate.getPassword()) : null,
+            userAggregate.getProvider(),
+            userAggregate.getProviderId(),
+            userAggregate.getFirstName(),
+            userAggregate.getLastName(),
+            userAggregate.getProfilePicture()
+        );
+
+        return userAggregate;
     }
 
     public Optional<UserAggregate> findByEmail(String email) {

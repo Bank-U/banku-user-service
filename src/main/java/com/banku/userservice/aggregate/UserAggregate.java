@@ -5,7 +5,11 @@ import com.banku.userservice.event.UserLoginEvent;
 import com.banku.userservice.event.UserCreatedEvent;
 import com.banku.userservice.event.UserDeletedEvent;
 import com.banku.userservice.event.UserUpdatedEvent;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,9 +21,18 @@ import java.util.ArrayList;
 
 @Getter
 @Setter 
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UserAggregate extends Aggregate implements UserDetails {
     private String email;
     private String password;
+    private String provider;
+    private String providerId;
+    private String firstName;
+    private String lastName;
+    private String profilePicture;
+    @Builder.Default
     private List<LoginHistoryAggregate> loginHistory = new ArrayList<>();
 
     @Override

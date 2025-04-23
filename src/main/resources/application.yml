@@ -15,6 +15,14 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  oauth2:
+    client:
+      registration:
+        google:
+          client-id: ${spring.security.oauth2.client.registration.google.client-id}
+          client-secret: ${spring.security.oauth2.client.registration.google.client-secret}
+          scope: ${spring.security.oauth2.client.registration.google.scope}
+          redirect-uri: ${spring.security.oauth2.client.registration.google.redirect-uri}
 
 jwt:
   secret: ${jwt.secret}
@@ -24,8 +32,9 @@ server:
 
 logging:
   level:
-    com.banku.userservice: DEBUG
-    org.springframework.security: DEBUG 
+    root: DEBUG
+    com: DEBUG
+    org: DEBUG 
 
 springdoc:
   swagger-ui:
