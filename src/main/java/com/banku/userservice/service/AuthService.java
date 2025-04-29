@@ -20,6 +20,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -35,6 +36,8 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserAggregateRepository aggregateRepository;
     private final OAuthProviderService oAuthProviderService;
+    @Value("${frontend.redirect-url}")
+    private String frontendRedirectUrl;
 
 
     public AuthResponse register(RegisterRequest request) {
@@ -123,18 +126,17 @@ public class AuthService {
         return new AuthResponse(jwtToken, user.getId());
     }
 
-    public ResponseEntity<Void>     handleOAuth2Callback(String provider, String code) {
+    public ResponseEntity<Void> handleOAuth2Callback(String provider, String code) {
         OAuthProvider oAuthProvider = oAuthProviderService.getProvider(provider);
         UserAggregate oauthUser = oAuthProvider.getUserInfo(code);
 
-        log.debug("oauthUserEEMAIL: " + oauthUser.getEmail());
-        UserAggregate user = userService.findByEmail(oauthUser.getEmail())
-            .orElseGet(() -> userService.register(oauthUser));
+        Optional<UserAggregate> existingUser = userService.findByEmail(oauthUser.getEmail());
+        UserAggregate user = existingUser.orElseGet(() -> userService.register(oauthUser));
 
         String jwtToken = generateToken(user.getEmail(), user.getId());
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", "http://localhost:4200/auth/callback?token=" + jwtToken);
+        headers.add("Location", frontendRedirectUrl + "?token=" + jwtToken);
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 } 

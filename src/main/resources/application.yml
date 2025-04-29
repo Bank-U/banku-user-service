@@ -27,6 +27,9 @@ spring:
 jwt:
   secret: ${jwt.secret}
 
+frontend:
+  redirect-url: ${frontend.redirect-url}
+
 server:
   port: 8081
 
@@ -34,7 +37,10 @@ logging:
   level:
     root: DEBUG
     com: DEBUG
-    org: DEBUG 
+    org.apache.kafka: INFO
+    org.springframework: INFO
+    org.mongodb.driver: INFO
+    jdk.event.security: INFO
 
 springdoc:
   swagger-ui:
