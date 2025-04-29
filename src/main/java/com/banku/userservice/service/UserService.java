@@ -32,10 +32,29 @@ public class UserService {
         userAggregateRepository.createUser(
                 aggregateId,
                 email,
-                passwordEncoder.encode(password)
+                password != null ? passwordEncoder.encode(password) : null
         );
         
         return aggregate;
+    }
+
+    public UserAggregate register(UserAggregate userAggregate) {
+        if (userAggregateRepository.findByEmail(userAggregate.getEmail()).isPresent()) {
+            throw new DuplicateEmailException("Email already exists");
+        }
+
+        userAggregateRepository.createUser(
+            userAggregate.getId(),
+            userAggregate.getEmail(),
+            userAggregate.getPassword() != null ? passwordEncoder.encode(userAggregate.getPassword()) : null,
+            userAggregate.getProvider(),
+            userAggregate.getProviderId(),
+            userAggregate.getFirstName(),
+            userAggregate.getLastName(),
+            userAggregate.getProfilePicture()
+        );
+
+        return userAggregate;
     }
 
     public Optional<UserAggregate> findByEmail(String email) {
@@ -48,7 +67,7 @@ public class UserService {
             throw new UserNotFoundException("User not found");
         }
         
-        return new UserSelfResponse(aggregate.getId(), aggregate.getEmail(), aggregate.getLoginHistory());
+        return new UserSelfResponse(aggregate);
     }
 
     public UserSelfResponse updateUser(String userId, UpdateUserRequest request) {
@@ -61,19 +80,19 @@ public class UserService {
         // Validate passwords
         validatePassword(request.getCurrentPassword(), request.getNewPassword(), aggregate.getPassword());
 
-        if (request.getNewPassword() != null) {
-            aggregate.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        }
-
         // Update user with current data (this will create a new event)
-        userAggregateRepository.updateUser(userId, request.getEmail(), request.getNewPassword());
+        userAggregateRepository.updateUser(
+            userId,
+            request.getEmail(),
+            request.getNewPassword() != null ? passwordEncoder.encode(request.getNewPassword()) : null
+        );
         
         // Return current user info
-        return new UserSelfResponse(
-            userId,
-            Optional.ofNullable(request.getEmail()).orElse(aggregate.getEmail()),
-            aggregate.getLoginHistory()
-        );
+        return UserSelfResponse.builder()
+            .userId(userId)
+            .email(Optional.ofNullable(request.getEmail()).orElse(aggregate.getEmail()))
+            .loginHistory(aggregate.getLoginHistory())
+            .build();
     }
 
     private void validatePassword(String currentPassword, String newPassword, String storedPassword) {

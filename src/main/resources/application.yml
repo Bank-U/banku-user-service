@@ -15,14 +15,42 @@ spring:
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer
+  oauth2:
+    client:
+      registration:
+        google:
+          client-id: ${spring.security.oauth2.client.registration.google.client-id}
+          client-secret: ${spring.security.oauth2.client.registration.google.client-secret}
+          scope: ${spring.security.oauth2.client.registration.google.scope}
+          redirect-uri: ${spring.security.oauth2.client.registration.google.redirect-uri}
 
 jwt:
   secret: ${jwt.secret}
+
+frontend:
+  redirect-url: ${frontend.redirect-url}
 
 server:
   port: 8081
 
 logging:
   level:
-    com.banku.userservice: DEBUG
-    org.springframework.security: DEBUG 
+    root: DEBUG
+    com: DEBUG
+    org.apache.kafka: INFO
+    org.springframework: INFO
+    org.mongodb.driver: INFO
+    jdk.event.security: INFO
+
+springdoc:
+  swagger-ui:
+    path: /api/v1/users/swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    tryItOutEnabled: true
+    filter: true
+  api-docs:
+    path: /api/v1/users/v3/api-docs
+  show-actuator: true
+  packages-to-scan: com.banku.userservice.controller
+  paths-to-match: /api/v1/** 

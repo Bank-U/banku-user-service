@@ -52,6 +52,7 @@ The service implements Event Sourcing to maintain user state. Events are stored 
 - `UserCreatedEvent`: When a new user is created
 - `UserUpdatedEvent`: When an existing user is updated
 - `UserDeletedEvent`: When a user is deleted
+- `UserLoginEvent`: When a user has logged in
 
 ### Event Store
 
@@ -153,6 +154,15 @@ spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.Str
 - `GET /api/v1/users/me`: Get current user information
 - `PUT /api/v1/users/me`: Update current user information
 - `DELETE /api/v1/users/me`: Delete current user
+
+## API Documentation
+
+The service provides OpenAPI (Swagger) documentation that can be accessed through:
+
+- Direct access: http://localhost:8081/api/v1/user/swagger-ui/index.html
+- Through Gateway: http://localhost:8080/api/v1/user/swagger-ui/index.html
+
+The API documentation includes detailed information about all endpoints, request/response schemas, and authentication requirements.
 
 ## Development
 

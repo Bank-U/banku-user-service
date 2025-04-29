@@ -34,8 +34,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
 
     @Override
     public Optional<UserAggregate> findByEmail(String email) {
-        List<UserEvent> allEvents = eventStore.findAll();
-        return allEvents.stream()
+        return eventStore.findAll().stream()
                 .filter(event -> {
                     UserAggregate aggregate = findById(event.getAggregateId());
                     return aggregate != null && email.equals(aggregate.getEmail());
@@ -58,6 +57,12 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
         kafkaService.publishEvent(event);
     }
 
+    public void createUser(String aggregateId, String email, String password, String provider, String providerId, String firstName, String lastName, String profilePicture) {
+        UserCreatedEvent event = new UserCreatedEvent(aggregateId, email, password, provider, providerId, firstName, lastName, profilePicture);
+        event.setVersion(1);
+        eventStore.save(event);
+        kafkaService.publishEvent(event);
+    }
     public void updateUser(String id, String email, String password) {
         UserAggregate aggregate = findById(id);
         if (aggregate != null) {
