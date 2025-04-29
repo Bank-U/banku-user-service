@@ -23,6 +23,46 @@ User service for BankU, implemented with Spring Boot and following Event Sourcin
 - Docker
 - Docker Compose
 
+## Configuration
+
+### Required Environment Variables
+
+The service requires the following environment variables to be set:
+
+```bash
+# JWT Configuration
+jwt.secret=2a1cf8399b4951d738e9b62c63b11c867f7c4e471cb108c1e7b4a4377e5d7a4f
+
+# MongoDB Configuration
+spring.data.mongodb.uri=mongodb://banku:secret@localhost:27017/banku-user?authSource=admin
+
+# Kafka Configuration
+spring.kafka.bootstrap-servers=localhost:9092
+
+# OAuth2 Configuration
+spring.security.oauth2.client.registration.google.client-id=000000000000-00000000000000000000000000000000.apps.googleusercontent.com
+spring.security.oauth2.client.registration.google.client-secret=GOCSPX-000000000000_0000-0000000000
+spring.security.oauth2.client.registration.google.scope=email,profile
+spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/api/v1/auth/oauth2/callback/google
+
+# Frontend Configuration
+frontend.redirect-url=http://localhost:4200/auth/callback
+```
+
+### Local Development Setup
+
+1. Create a `application-local.properties` file in the project root with the required environment variables
+2. Start the required services using Docker Compose:
+   ```bash
+   docker-compose up -d
+   ```
+3. Run the application:
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+
+The service will be available at `http://localhost:8081`
+
 ## Project Structure
 
 ```
@@ -74,95 +114,11 @@ Events are published to the `banku.user` topic with the following structure:
 - Key: Aggregate ID (user)
 - Value: Serialized event in JSON with type information
 
-## Docker Compose
-
-The project includes a Docker Compose configuration for local development:
-
-```yaml
-version: '3.8'
-
-services:
-  mongodb:
-    image: mongo:6.0
-    container_name: banku-mongodb
-    ports:
-      - "27017:27017"
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: banku
-      MONGO_INITDB_ROOT_PASSWORD: secret
-      MONGO_INITDB_DATABASE: banku-user
-    volumes:
-      - mongo_data:/data/db
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
-    container_name: banku-zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-
-  kafka:
-    image: confluentinc/cp-kafka:7.3.0
-    container_name: banku-kafka
-    depends_on:
-      - zookeeper
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-
-volumes:
-  mongo_data:
-```
-
-## Configuration
-
-### MongoDB
-
-```properties
-spring.data.mongodb.uri=mongodb://banku:secret@localhost:27017/banku-user?authSource=admin
-```
-
-### Kafka
-
-```properties
-spring.kafka.bootstrap-servers=localhost:9092
-spring.kafka.consumer.group-id=banku-user-group
-spring.kafka.consumer.auto-offset-reset=earliest
-spring.kafka.consumer.key-deserializer=org.apache.kafka.common.serialization.StringDeserializer
-spring.kafka.consumer.value-deserializer=org.apache.kafka.common.serialization.StringDeserializer
-spring.kafka.producer.key-serializer=org.apache.kafka.common.serialization.StringSerializer
-spring.kafka.producer.value-serializer=org.apache.kafka.common.serialization.StringSerializer
-```
-
-## API Endpoints
-
-### Authentication
-
-- `POST /api/v1/auth/register`: Register new user
-- `POST /api/v1/auth/login`: User login
-
-### Users
-
-- `GET /api/v1/users/me`: Get current user information
-- `PUT /api/v1/users/me`: Update current user information
-- `DELETE /api/v1/users/me`: Delete current user
-
 ## API Documentation
 
-The service provides OpenAPI (Swagger) documentation that can be accessed through:
-
-- Direct access: http://localhost:8081/api/v1/user/swagger-ui/index.html
-- Through Gateway: http://localhost:8080/api/v1/user/swagger-ui/index.html
-
-The API documentation includes detailed information about all endpoints, request/response schemas, and authentication requirements.
+The service provides Swagger UI for API documentation at:
+- Swagger UI: `http://localhost:8081/api/v1/users/swagger-ui.html`
+- OpenAPI JSON: `http://localhost:8081/api/v1/users/v3/api-docs`
 
 ## Development
 
