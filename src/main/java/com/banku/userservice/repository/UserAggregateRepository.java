@@ -34,8 +34,7 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
 
     @Override
     public Optional<UserAggregate> findByEmail(String email) {
-        List<UserEvent> allEvents = eventStore.findAll();
-        return allEvents.stream()
+        return eventStore.findAll().stream()
                 .filter(event -> {
                     UserAggregate aggregate = findById(event.getAggregateId());
                     return aggregate != null && email.equals(aggregate.getEmail());

@@ -52,6 +52,11 @@ public class UserAggregate extends Aggregate implements UserDetails {
     private void apply(UserCreatedEvent event) {
         this.email = event.getEmail();
         this.password = event.getPassword();
+        this.provider = event.getProvider();
+        this.providerId = event.getProviderId();
+        this.firstName = event.getFirstName();
+        this.lastName = event.getLastName();
+        this.profilePicture = event.getProfilePicture();
     }
 
     private void apply(UserUpdatedEvent event) {

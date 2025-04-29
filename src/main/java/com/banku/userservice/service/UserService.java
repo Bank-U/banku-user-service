@@ -67,7 +67,7 @@ public class UserService {
             throw new UserNotFoundException("User not found");
         }
         
-        return new UserSelfResponse(aggregate.getId(), aggregate.getEmail(), aggregate.getLoginHistory());
+        return new UserSelfResponse(aggregate);
     }
 
     public UserSelfResponse updateUser(String userId, UpdateUserRequest request) {
@@ -88,11 +88,11 @@ public class UserService {
         );
         
         // Return current user info
-        return new UserSelfResponse(
-            userId,
-            Optional.ofNullable(request.getEmail()).orElse(aggregate.getEmail()),
-            aggregate.getLoginHistory()
-        );
+        return UserSelfResponse.builder()
+            .userId(userId)
+            .email(Optional.ofNullable(request.getEmail()).orElse(aggregate.getEmail()))
+            .loginHistory(aggregate.getLoginHistory())
+            .build();
     }
 
     private void validatePassword(String currentPassword, String newPassword, String storedPassword) {
