@@ -30,7 +30,8 @@ jwt:
   secret: ${jwt.secret}
 
 frontend:
-  redirect-url: ${frontend.redirect-url}
+  redirect:
+    url: ${frontend.redirect.url}
 
 server:
   port: 8080

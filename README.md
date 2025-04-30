@@ -46,7 +46,7 @@ spring.security.oauth2.client.registration.google.scope=email,profile
 spring.security.oauth2.client.registration.google.redirect-uri=http://localhost:8080/api/v1/auth/oauth2/callback/google
 
 # Frontend Configuration
-frontend.redirect-url=http://localhost:4200/auth/callback
+frontend.redirect.url=http://localhost:4200/auth/callback
 ```
 
 ### Local Development Setup
