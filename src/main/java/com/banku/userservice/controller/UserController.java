@@ -48,18 +48,18 @@ public class UserController {
         description = "Updates the current user's information"
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "User information updated successfully",
-            content = @Content(schema = @Schema(implementation = UserSelfResponse.class))),
+        @ApiResponse(responseCode = "204", description = "User information updated successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid input"),
         @ApiResponse(responseCode = "401", description = "User not authenticated")
     })
     @PutMapping
-    public ResponseEntity<UserSelfResponse> updateUser(@RequestBody UpdateUserRequest request) {
+    public ResponseEntity<Void> updateUser(@RequestBody UpdateUserRequest request) {
         String userId = JwtService.extractUserId();
         if (userId == null) {
             throw new UnauthorizedAccessException("User not authenticated");
         }
-        return ResponseEntity.ok(userService.updateUser(userId, request));
+        userService.updateUser(userId, request);
+        return ResponseEntity.noContent().build();
     }
 
     @Operation(
