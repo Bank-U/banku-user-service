@@ -60,7 +60,6 @@ public class JwtService {
             
             String userId = claims.get("userId", String.class);
             if (userId != null) {
-                log.info("Found userId in claims: {}", userId);
                 return userId;
             }
             
@@ -69,7 +68,6 @@ public class JwtService {
                 Map<String, Object> extraClaims = (Map<String, Object>) extraClaimsObj;
                 if (extraClaims.containsKey("userId")) {
                     userId = (String) extraClaims.get("userId");
-                    log.info("Found userId in extraClaims: {}", userId);
                     return userId;
                 }
             }
