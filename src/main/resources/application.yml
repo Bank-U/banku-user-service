@@ -38,12 +38,8 @@ server:
 
 logging:
   level:
-    root: DEBUG
-    com: DEBUG
-    org.apache.kafka: INFO
-    org.springframework: INFO
-    org.mongodb.driver: INFO
-    jdk.event.security: INFO
+    com.banku.userservice: DEBUG
+    org.springframework.security: INFO 
 
 springdoc:
   swagger-ui:
