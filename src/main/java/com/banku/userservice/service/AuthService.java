@@ -123,6 +123,9 @@ public class AuthService {
         UserAggregate user = existingUser.orElseGet(() -> userService.register(oauthUser));
 
         String jwtToken = generateToken(user.getEmail(), user.getId());
+
+        aggregateRepository.loginUser(user, true);
+        
         return new AuthResponse(jwtToken, user.getId());
     }
 
@@ -134,6 +137,8 @@ public class AuthService {
         UserAggregate user = existingUser.orElseGet(() -> userService.register(oauthUser));
 
         String jwtToken = generateToken(user.getEmail(), user.getId());
+        
+        aggregateRepository.loginUser(user, true);
 
         HttpHeaders headers = new HttpHeaders();
         headers.add("Location", frontendRedirectUrl + "?token=" + jwtToken);
