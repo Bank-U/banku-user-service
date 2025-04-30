@@ -2,7 +2,7 @@ spring:
   application:
     name: banku-user-service
   profiles:
-    active: prod
+    active: local
   data:
     mongodb:
       uri: ${spring.data.mongodb.uri}
