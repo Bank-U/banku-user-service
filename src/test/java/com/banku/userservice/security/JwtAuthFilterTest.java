@@ -55,7 +55,6 @@ class JwtAuthFilterTest {
     @Test
     void doFilterInternal_WhenValidToken_ShouldSetAuthentication() throws ServletException, IOException {
         // Arrange
-        when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
         when(request.getHeader("Authorization")).thenReturn("Bearer " + TEST_TOKEN);
         when(jwtService.extractUsername(TEST_TOKEN)).thenReturn(TEST_USERNAME);
         when(authenticationService.loadUserByUsername(TEST_USERNAME)).thenReturn(userDetails);
@@ -85,7 +84,6 @@ class JwtAuthFilterTest {
     @Test
     void doFilterInternal_WhenInvalidToken_ShouldContinueChain() throws ServletException, IOException {
         // Arrange
-        when(userDetails.getUsername()).thenReturn(TEST_USERNAME);
         when(request.getHeader("Authorization")).thenReturn("Bearer " + TEST_TOKEN);
         when(jwtService.extractUsername(TEST_TOKEN)).thenReturn(TEST_USERNAME);
         when(authenticationService.loadUserByUsername(TEST_USERNAME)).thenReturn(userDetails);

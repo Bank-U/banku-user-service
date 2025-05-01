@@ -4,6 +4,7 @@ import com.banku.userservice.aggregate.UserAggregate;
 import com.banku.userservice.controller.dto.UpdateUserRequest;
 import com.banku.userservice.controller.dto.UserSelfResponse;
 import com.banku.userservice.exception.DuplicateEmailException;
+import com.banku.userservice.exception.InvalidPasswordException;
 import com.banku.userservice.exception.UserNotFoundException;
 import com.banku.userservice.repository.UserAggregateRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +19,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -32,129 +34,148 @@ class UserServiceTest {
     @InjectMocks
     private UserService userService;
 
-    private static final String TEST_EMAIL = "test@example.com";
-    private static final String TEST_PASSWORD = "password123";
-    private static final String TEST_USER_ID = "user123";
-    private static final String ENCODED_PASSWORD = "encodedPassword123";
-
     private UserAggregate testUser;
+    private String testUserId;
+    private String testEmail;
+    private String testPassword;
 
     @BeforeEach
     void setUp() {
+        testUserId = "test-user-id";
+        testEmail = "test@example.com";
+        testPassword = "password123";
+        
         testUser = new UserAggregate();
-        testUser.setId(TEST_USER_ID);
-        testUser.setEmail(TEST_EMAIL);
-        testUser.setPassword(ENCODED_PASSWORD);
+        testUser.setId(testUserId);
+        testUser.setEmail(testEmail);
+        testUser.setPassword(testPassword);
     }
 
     @Test
-    void register_WhenEmailDoesNotExist_ShouldCreateUser() {
-        // Arrange
-        when(userAggregateRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(TEST_PASSWORD)).thenReturn(ENCODED_PASSWORD);
-        doNothing().when(userAggregateRepository).createUser(any(), any(), any());
-
-        // Act
-        UserAggregate result = userService.register(TEST_EMAIL, TEST_PASSWORD);
-
-        // Assert
+    void testRegisterWithEmailAndPassword() {
+        when(userAggregateRepository.findByEmail(testEmail)).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(testPassword)).thenReturn("encodedPassword");
+        
+        UserAggregate result = userService.register(testEmail, testPassword);
+        
         assertNotNull(result);
-        verify(userAggregateRepository).createUser(any(), eq(TEST_EMAIL), eq(ENCODED_PASSWORD));
-    }
-
-    @Test
-    void register_WhenEmailExists_ShouldThrowException() {
-        // Arrange
-        when(userAggregateRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
-
-        // Act & Assert
-        assertThrows(DuplicateEmailException.class, () -> 
-            userService.register(TEST_EMAIL, TEST_PASSWORD)
+        verify(userAggregateRepository).createUser(
+            anyString(),
+            eq(testEmail),
+            eq("encodedPassword")
         );
     }
 
     @Test
-    void getSelf_WhenUserExists_ShouldReturnUserResponse() {
-        // Arrange
-        when(userAggregateRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.of(testUser));
-
-        // Act
-        UserSelfResponse response = userService.getSelf(TEST_EMAIL);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(TEST_USER_ID, response.getUserId());
-        assertEquals(TEST_EMAIL, response.getEmail());
+    void testRegisterWithEmailAndPassword_DuplicateEmail() {
+        when(userAggregateRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
+        
+        assertThrows(DuplicateEmailException.class, () -> {
+            userService.register(testEmail, testPassword);
+        });
     }
 
     @Test
-    void getSelf_WhenUserDoesNotExist_ShouldThrowException() {
-        // Arrange
-        when(userAggregateRepository.findByEmail(TEST_EMAIL)).thenReturn(Optional.empty());
-
-        // Act & Assert
-        assertThrows(UserNotFoundException.class, () -> 
-            userService.getSelf(TEST_EMAIL)
+    void testRegisterWithUserAggregate() {
+        when(userAggregateRepository.findByEmail(testEmail)).thenReturn(Optional.empty());
+        when(passwordEncoder.encode(testPassword)).thenReturn("encodedPassword");
+        
+        UserAggregate result = userService.register(testUser);
+        
+        assertNotNull(result);
+        verify(userAggregateRepository).createUser(
+            eq(testUserId),
+            eq(testEmail),
+            eq("encodedPassword"),
+            eq(testUser.getProvider()),
+            eq(testUser.getProviderId()),
+            eq(testUser.getFirstName()),
+            eq(testUser.getLastName()),
+            eq(testUser.getProfilePicture())
         );
     }
 
     @Test
-    void updateUser_WhenUserExists_ShouldUpdateUser() {
-        // Arrange
-        String newEmail = "new@example.com";
-        String newPassword = "newPassword123";
+    void testFindByEmail() {
+        when(userAggregateRepository.findByEmail(testEmail)).thenReturn(Optional.of(testUser));
+        
+        Optional<UserAggregate> result = userService.findByEmail(testEmail);
+        
+        assertTrue(result.isPresent());
+        assertEquals(testUser, result.get());
+    }
+
+    @Test
+    void testGetSelf() {
+        when(userAggregateRepository.findById(testUserId)).thenReturn(testUser);
+        
+        UserSelfResponse result = userService.getSelf(testUserId);
+        
+        assertNotNull(result);
+        assertEquals(testUserId, result.getUserId());
+        assertEquals(testEmail, result.getEmail());
+    }
+
+    @Test
+    void testGetSelf_UserNotFound() {
+        when(userAggregateRepository.findById(testUserId)).thenReturn(null);
+        
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.getSelf(testUserId);
+        });
+    }
+
+    @Test
+    void testUpdateUser() {
         UpdateUserRequest request = new UpdateUserRequest();
-        request.setEmail(newEmail);
-        request.setNewPassword(newPassword);
-
-        when(userAggregateRepository.findById(TEST_USER_ID)).thenReturn(testUser);
-        when(userAggregateRepository.findByEmail(newEmail)).thenReturn(Optional.empty());
-        when(passwordEncoder.encode(newPassword)).thenReturn("newEncodedPassword");
-
-        // Act
-        UserSelfResponse response = userService.updateUser(TEST_USER_ID, request);
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(TEST_USER_ID, response.getUserId());
-        assertEquals(newEmail, response.getEmail());
-        verify(userAggregateRepository).updateUser(eq(TEST_USER_ID), eq(newEmail), any());
+        request.setEmail("new@example.com");
+        request.setCurrentPassword(testPassword);
+        request.setNewPassword("newPassword123");
+        
+        when(userAggregateRepository.findById(testUserId)).thenReturn(testUser);
+        when(passwordEncoder.matches(testPassword, testPassword)).thenReturn(true);
+        when(passwordEncoder.encode("newPassword123")).thenReturn("encodedNewPassword");
+        
+        UserSelfResponse result = userService.updateUser(testUserId, request);
+        
+        assertNotNull(result);
+        assertEquals("new@example.com", result.getEmail());
+        verify(userAggregateRepository).updateUser(
+            eq(testUserId),
+            eq("new@example.com"),
+            eq("encodedNewPassword")
+        );
     }
 
     @Test
-    void updateUser_WhenUserDoesNotExist_ShouldThrowException() {
-        // Arrange
-        when(userAggregateRepository.findById(TEST_USER_ID)).thenReturn(null);
+    void testUpdateUser_InvalidPassword() {
         UpdateUserRequest request = new UpdateUserRequest();
-        request.setEmail(TEST_EMAIL);
-        request.setNewPassword(TEST_PASSWORD);
-
-        // Act & Assert
-        assertThrows(UserNotFoundException.class, () -> 
-            userService.updateUser(TEST_USER_ID, request)
-        );
+        request.setCurrentPassword("wrongPassword");
+        request.setNewPassword("newPassword123");
+        
+        when(userAggregateRepository.findById(testUserId)).thenReturn(testUser);
+        when(passwordEncoder.matches("wrongPassword", testPassword)).thenReturn(false);
+        
+        assertThrows(InvalidPasswordException.class, () -> {
+            userService.updateUser(testUserId, request);
+        });
     }
 
     @Test
-    void deleteUser_WhenUserExists_ShouldDeleteUser() {
-        // Arrange
-        when(userAggregateRepository.findById(TEST_USER_ID)).thenReturn(testUser);
-
-        // Act
-        userService.deleteUser(TEST_USER_ID);
-
-        // Assert
-        verify(userAggregateRepository).deleteUser(TEST_USER_ID);
+    void testDeleteUser() {
+        when(userAggregateRepository.findById(testUserId)).thenReturn(testUser);
+        
+        userService.deleteUser(testUserId);
+        
+        verify(userAggregateRepository).deleteUser(testUserId);
     }
 
     @Test
-    void deleteUser_WhenUserDoesNotExist_ShouldThrowException() {
-        // Arrange
-        when(userAggregateRepository.findById(TEST_USER_ID)).thenReturn(null);
-
-        // Act & Assert
-        assertThrows(UserNotFoundException.class, () -> 
-            userService.deleteUser(TEST_USER_ID)
-        );
+    void testDeleteUser_UserNotFound() {
+        when(userAggregateRepository.findById(testUserId)).thenReturn(null);
+        
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.deleteUser(testUserId);
+        });
     }
 } 

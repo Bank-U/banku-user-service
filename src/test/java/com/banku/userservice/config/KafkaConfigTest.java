@@ -22,7 +22,7 @@ class KafkaConfigTest {
         // Assert
         assertNotNull(topic);
         assertEquals("banku.user", topic.name());
-        assertEquals(1, topic.numPartitions());
+        assertEquals(2, topic.numPartitions());
         assertEquals(1, (short) topic.replicationFactor());
     }
 } 
