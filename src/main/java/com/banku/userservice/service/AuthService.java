@@ -36,7 +36,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final UserAggregateRepository aggregateRepository;
     private final OAuthProviderService oAuthProviderService;
-    @Value("${frontend.redirect-url}")
+    @Value("${frontend.redirect.url}")
     private String frontendRedirectUrl;
 
 
