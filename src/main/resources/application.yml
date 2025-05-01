@@ -2,7 +2,7 @@ spring:
   application:
     name: banku-user-service
   profiles:
-    active: prod
+    active: local
   data:
     mongodb:
       uri: ${spring.data.mongodb.uri}
@@ -30,19 +30,16 @@ jwt:
   secret: ${jwt.secret}
 
 frontend:
-  redirect-url: ${frontend.redirect-url}
+  redirect:
+    url: ${frontend.redirect.url}
 
 server:
-  port: 8081
+  port: 8080
 
 logging:
   level:
-    root: DEBUG
-    com: DEBUG
-    org.apache.kafka: INFO
-    org.springframework: INFO
-    org.mongodb.driver: INFO
-    jdk.event.security: INFO
+    com.banku.userservice: DEBUG
+    org.springframework.security: INFO 
 
 springdoc:
   swagger-ui:
