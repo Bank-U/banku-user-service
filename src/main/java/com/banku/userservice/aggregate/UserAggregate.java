@@ -32,6 +32,7 @@ public class UserAggregate extends Aggregate implements UserDetails {
     private String firstName;
     private String lastName;
     private String profilePicture;
+    private String preferredLanguage;
     @Builder.Default
     private List<LoginHistoryAggregate> loginHistory = new ArrayList<>();
 
@@ -57,6 +58,7 @@ public class UserAggregate extends Aggregate implements UserDetails {
         this.firstName = event.getFirstName();
         this.lastName = event.getLastName();
         this.profilePicture = event.getProfilePicture();
+        this.preferredLanguage = event.getPreferredLanguage();
     }
 
     private void apply(UserUpdatedEvent event) {
@@ -65,6 +67,9 @@ public class UserAggregate extends Aggregate implements UserDetails {
         }
         if (event.getPassword() != null) {
             this.password = event.getPassword();
+        }
+        if (event.getPreferredLanguage() != null) {
+            this.preferredLanguage = event.getPreferredLanguage();
         }
     }
 

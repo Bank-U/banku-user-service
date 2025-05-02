@@ -5,7 +5,6 @@ import com.banku.userservice.controller.dto.AuthResponse;
 import com.banku.userservice.controller.dto.LoginRequest;
 import com.banku.userservice.controller.dto.OAuthLoginRequest;
 import com.banku.userservice.controller.dto.RegisterRequest;
-import com.banku.userservice.exception.InvalidPasswordException;
 import com.banku.userservice.exception.UserNotFoundException;
 import com.banku.userservice.repository.UserAggregateRepository;
 import com.banku.userservice.security.JwtService;
@@ -124,6 +123,7 @@ public class AuthService {
 
         String jwtToken = generateToken(user.getEmail(), user.getId());
 
+        user.setVersion(user.getVersion() + 1);
         aggregateRepository.loginUser(user, true);
         
         return new AuthResponse(jwtToken, user.getId());
@@ -138,6 +138,7 @@ public class AuthService {
 
         String jwtToken = generateToken(user.getEmail(), user.getId());
         
+        user.setVersion(user.getVersion() + 1);
         aggregateRepository.loginUser(user, true);
 
         HttpHeaders headers = new HttpHeaders();
