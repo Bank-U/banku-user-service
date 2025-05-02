@@ -51,7 +51,8 @@ public class UserService {
             userAggregate.getProviderId(),
             userAggregate.getFirstName(),
             userAggregate.getLastName(),
-            userAggregate.getProfilePicture()
+            userAggregate.getProfilePicture(),
+            userAggregate.getPreferredLanguage()
         );
 
         return userAggregate;
@@ -84,13 +85,15 @@ public class UserService {
         userAggregateRepository.updateUser(
             userId,
             request.getEmail(),
-            request.getNewPassword() != null ? passwordEncoder.encode(request.getNewPassword()) : null
+            request.getNewPassword() != null ? passwordEncoder.encode(request.getNewPassword()) : null,
+            request.getPreferredLanguage()
         );
         
         // Return current user info
         return UserSelfResponse.builder()
             .userId(userId)
             .email(Optional.ofNullable(request.getEmail()).orElse(aggregate.getEmail()))
+            .preferredLanguage(Optional.ofNullable(request.getPreferredLanguage()).orElse(aggregate.getPreferredLanguage()))
             .loginHistory(aggregate.getLoginHistory())
             .build();
     }

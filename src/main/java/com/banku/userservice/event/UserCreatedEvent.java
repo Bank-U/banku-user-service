@@ -17,6 +17,7 @@ public class UserCreatedEvent extends UserEvent {
     private String firstName;
     private String lastName;
     private String profilePicture;
+    private String preferredLanguage;
 
     public UserCreatedEvent(String aggregateId, String email, String password) {
         this.aggregateId = aggregateId;
@@ -24,7 +25,7 @@ public class UserCreatedEvent extends UserEvent {
         this.password = password;
     }
 
-    public UserCreatedEvent(String aggregateId, String email, String password, String provider, String providerId, String firstName, String lastName, String profilePicture) {
+    public UserCreatedEvent(String aggregateId, String email, String password, String provider, String providerId, String firstName, String lastName, String profilePicture, String preferredLanguage) {
         this.aggregateId = aggregateId;
         this.email = email;
         this.password = password;
@@ -33,5 +34,6 @@ public class UserCreatedEvent extends UserEvent {
         this.firstName = firstName;
         this.lastName = lastName;
         this.profilePicture = profilePicture;
+        this.preferredLanguage = preferredLanguage;
     }
 } 

@@ -53,12 +53,13 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
     public void createUser(String aggregateId, String email, String password) {
         UserCreatedEvent event = new UserCreatedEvent(aggregateId, email, password);
         event.setVersion(1);
+        event.setPreferredLanguage("en");
         eventStore.save(event);
         kafkaService.publishEvent(event);
     }
 
-    public void createUser(String aggregateId, String email, String password, String provider, String providerId, String firstName, String lastName, String profilePicture) {
-        UserCreatedEvent event = new UserCreatedEvent(aggregateId, email, password, provider, providerId, firstName, lastName, profilePicture);
+    public void createUser(String aggregateId, String email, String password, String provider, String providerId, String firstName, String lastName, String profilePicture, String preferredLanguage) {
+        UserCreatedEvent event = new UserCreatedEvent(aggregateId, email, password, provider, providerId, firstName, lastName, profilePicture, preferredLanguage);
         event.setVersion(1);
         eventStore.save(event);
         kafkaService.publishEvent(event);
@@ -67,6 +68,16 @@ public class UserAggregateRepository implements AggregateRepository<UserAggregat
         UserAggregate aggregate = findById(id);
         if (aggregate != null) {
             UserUpdatedEvent event = new UserUpdatedEvent(id, email, password);
+            event.setVersion(aggregate.getVersion() + 1);
+            eventStore.save(event);
+            kafkaService.publishEvent(event);
+        }
+    }
+
+    public void updateUser(String id, String email, String password, String preferredLanguage) {
+        UserAggregate aggregate = findById(id);
+        if (aggregate != null) {
+            UserUpdatedEvent event = new UserUpdatedEvent(id, email, password, preferredLanguage);
             event.setVersion(aggregate.getVersion() + 1);
             eventStore.save(event);
             kafkaService.publishEvent(event);

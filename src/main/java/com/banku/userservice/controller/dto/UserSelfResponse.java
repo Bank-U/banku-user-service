@@ -20,6 +20,7 @@ public class UserSelfResponse {
     private String firstName;
     private String lastName;
     private String profilePicture;
+    private String preferredLanguage;
     private List<LoginHistoryAggregate> loginHistory;
 
     public UserSelfResponse(UserAggregate userAggregate) {
@@ -28,6 +29,7 @@ public class UserSelfResponse {
         this.firstName = userAggregate.getFirstName();
         this.lastName = userAggregate.getLastName();
         this.profilePicture = userAggregate.getProfilePicture();
+        this.preferredLanguage = userAggregate.getPreferredLanguage();
         this.loginHistory = userAggregate.getLoginHistory();
     }
 } 
