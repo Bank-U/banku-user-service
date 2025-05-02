@@ -91,7 +91,8 @@ class UserServiceTest {
             eq(testUser.getProviderId()),
             eq(testUser.getFirstName()),
             eq(testUser.getLastName()),
-            eq(testUser.getProfilePicture())
+            eq(testUser.getProfilePicture()),
+            eq(testUser.getPreferredLanguage())
         );
     }
 

@@ -10,10 +10,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-
+import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
+import java.util.Optional;
 
 @Component
+@Slf4j
 public class GoogleOAuthProvider implements OAuthProvider {
     private static final String PROVIDER_NAME = "google";
     private static final String TOKEN_URL = "https://oauth2.googleapis.com/token";
@@ -73,6 +75,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
         ResponseEntity<Map> response = restTemplate.exchange(USER_INFO_URL, HttpMethod.GET, request, Map.class);
 
         Map<String, Object> userInfo = response.getBody();
+        
         return UserAggregate.builder()
                 .email((String) userInfo.get("email"))
                 .firstName((String) userInfo.get("given_name"))
@@ -80,6 +83,7 @@ public class GoogleOAuthProvider implements OAuthProvider {
                 .profilePicture((String) userInfo.get("picture"))
                 .provider(PROVIDER_NAME)
                 .providerId((String) userInfo.get("id"))
+                .preferredLanguage(Optional.ofNullable((String) userInfo.get("locale")).orElse("en"))
                 .build();
     }
 } 
